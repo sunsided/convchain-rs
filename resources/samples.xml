@@ -1,4 +1,5 @@
 <samples>
+	<sample name="Smile" receptorSize="5" temperature="0.5" iterations="20" screenshots="1" outputSize="64"/>
 	<sample name="Boulders" receptorSize="3" temperature="0.5" iterations="5" screenshots="8" outputSize="32"/>
 	<sample name="SimpleMaze" receptorSize="2" temperature="1.0" iterations="10" screenshots="8" outputSize="32"/>
 	<sample name="Cave" receptorSize="3" temperature="1.0" iterations="10" screenshots="8" outputSize="32"/>
