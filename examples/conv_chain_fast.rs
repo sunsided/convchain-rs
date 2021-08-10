@@ -1,5 +1,6 @@
 use convchain::conv_chain;
 use image::GrayImage;
+use rayon::prelude::*;
 use serde::Deserialize;
 use std::fs;
 use std::path::PathBuf;
@@ -9,8 +10,7 @@ const RESOURCES_PATH: &str = "resources";
 fn main() {
     let doc = read_samples();
 
-    let mut pass = 1;
-    for row in doc.samples {
+    doc.samples.par_iter().enumerate().for_each(|(pass, row)| {
         let file_path = get_file_path(&row.name, "png");
         assert!(file_path.exists());
 
@@ -38,9 +38,7 @@ fn main() {
                 ))
                 .expect("unable to save output image");
         }
-
-        pass += 1;
-    }
+    });
 }
 
 fn to_array(img: &GrayImage) -> Vec<bool> {

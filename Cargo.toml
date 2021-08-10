@@ -13,9 +13,11 @@ path = "examples/conv_chain_fast.rs"
 
 [dependencies]
 rand = "0.8.4"
+convchain = { path = "." }
 
 [dev-dependencies]
 image = "0.23.14"
 quick-xml = { version = "0.22.0", features = ["serialize"] }
 serde = { version = "1.0.126", features = ["derive"]}
+rayon = "1.5.1"
 
