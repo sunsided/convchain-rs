@@ -1,4 +1,4 @@
-use convchain::slow;
+use convchain::conv_chain;
 use image::GrayImage;
 use serde::Deserialize;
 use std::fs;
@@ -21,7 +21,7 @@ fn main() {
 
         for k in 0..row.screenshots {
             println!("> {} {}", row.name, k);
-            let result = conv_chain_slow(
+            let result = conv_chain(
                 &sample,
                 gray.width(),
                 gray.height(),

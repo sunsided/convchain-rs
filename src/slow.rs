@@ -11,7 +11,6 @@ pub fn conv_chain(
 ) -> Vec<bool> {
     let mut field = vec![false; (output_size * output_size) as usize];
     let mut weights = vec![0.; 1 << (receptor_size * receptor_size)];
-    // TODO: create random
 
     for y in 0..sample_height {
         for x in 0..sample_width {

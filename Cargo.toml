@@ -4,8 +4,12 @@ version = "0.1.0"
 edition = "2018"
 
 [[example]]
-name = "conv_chain"
+name = "slow"
 path = "examples/conv_chain.rs"
+
+[[example]]
+name = "fast"
+path = "examples/conv_chain_fast.rs"
 
 [dependencies]
 rand = "0.8.4"
