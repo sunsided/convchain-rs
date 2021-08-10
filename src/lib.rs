@@ -1,4 +1,6 @@
-pub mod conv_chain;
+mod conv_chain;
+
+pub use conv_chain::conv_chain as conv_chain_slow;
 
 #[cfg(test)]
 mod tests {
