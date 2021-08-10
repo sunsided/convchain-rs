@@ -1,7 +1,14 @@
 [package]
 name = "convchain"
+description = "Bitmap generation from a single example with convolutions and MCMC"
 version = "0.1.0"
 edition = "2018"
+keywords = ["mcmc", "generative-imaging", "image-processing"]
+categories = ["computer-vision", "graphics", "game-development"]
+authors = ["Markus Mayer <widemeadows@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/sunsided/convchain-rs"
 
 [[example]]
 name = "slow"
@@ -13,7 +20,6 @@ path = "examples/conv_chain_fast.rs"
 
 [dependencies]
 rand = "0.8.4"
-convchain = { path = "." }
 
 [dev-dependencies]
 image = "0.23.14"
