@@ -83,8 +83,10 @@ impl ConvChain {
     }
 
     fn iteration_inner_loop(&self, out_x: usize, out_y: usize, sx: i64, sy: i64) -> f64 {
-        let mut ind = 0;
+        let mut weight_index = 0;
         let mut difference: i64 = 0;
+
+        let field = &self.field;
 
         for dy in 0..self.receptor_size {
             let local_y = self.get_local_coordinate(sy, dy);
@@ -99,7 +101,7 @@ impl ConvChain {
 
                 let value = self.field[local_row + local_x];
                 if value {
-                    ind += power;
+                    weight_index += power;
                 }
 
                 if is_relevant_row && is_relevant_column {
@@ -109,7 +111,7 @@ impl ConvChain {
         }
 
         // Metropolis algorithm: Determine energy difference before and after change.
-        self.weights[(ind - difference) as usize] / self.weights[ind as usize]
+        self.weights[(weight_index - difference) as usize] / self.weights[weight_index as usize]
     }
 
     fn get_local_coordinate(&self, s: i64, d: u32) -> usize {
