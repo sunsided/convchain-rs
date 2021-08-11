@@ -4,7 +4,7 @@ use rand::prelude::*;
 pub struct ConvChain {
     receptor_size: u32,
     one_over_temperature: f64,
-    output_size: i64,
+    output_size: usize,
     field: Vec<bool>,
     weights: Vec<f64>,
 }
@@ -28,7 +28,7 @@ impl ConvChain {
         Self {
             receptor_size,
             one_over_temperature,
-            output_size: output_size as i64,
+            output_size: output_size as usize,
             field,
             weights,
         }
@@ -37,7 +37,7 @@ impl ConvChain {
     pub fn process(&mut self, iterations: usize) -> &[bool] {
         let mut rng = rand::thread_rng();
         let num_field_elements = self.output_size * self.output_size;
-        let num_loops = iterations * num_field_elements as usize;
+        let num_loops = iterations * num_field_elements;
         for _ in 0..num_loops {
             let r = rng.gen_range(0..num_field_elements) as usize;
 
@@ -45,7 +45,7 @@ impl ConvChain {
 
             // Metropolis algorithm: If q is greater than or equal to 1, always accept.
             if q >= 1. {
-                self.field[r as usize] = !self.field[r as usize];
+                self.field[r] = !self.field[r];
                 continue;
             }
 
@@ -54,11 +54,72 @@ impl ConvChain {
                 q = q.powf(self.one_over_temperature);
             }
             if q > rng.gen() {
-                self.field[r as usize] = !self.field[r as usize];
+                self.field[r] = !self.field[r];
             }
         }
 
         &self.field
+    }
+
+    fn single_iteration(&self, r: usize) -> f64 {
+        let out_y = r / self.output_size;
+        let out_x = r % self.output_size;
+
+        let sy_min = out_y as i64 - self.receptor_size as i64 + 1;
+        let sy_max = out_y as i64 + self.receptor_size as i64 - 1;
+        let sx_min = out_x as i64 - self.receptor_size as i64 + 1;
+        let sx_max = out_x as i64 + self.receptor_size as i64 - 1;
+
+        let mut q: f64 = 1.0;
+
+        for sy in sy_min..=sy_max {
+            for sx in sx_min..=sx_max {
+                let weight = self.iteration_inner_loop(out_x, out_y, sx, sy);
+                q *= weight;
+            }
+        }
+
+        q
+    }
+
+    fn iteration_inner_loop(&self, out_x: usize, out_y: usize, sx: i64, sy: i64) -> f64 {
+        let mut ind = 0;
+        let mut difference: i64 = 0;
+
+        for dy in 0..self.receptor_size {
+            let local_y = self.get_local_coordinate(sy, dy);
+            let local_row = local_y * self.output_size;
+            let is_relevant_row = out_y == local_y;
+
+            for dx in 0..self.receptor_size {
+                let power = 1i64 << (dy * self.receptor_size + dx);
+
+                let local_x = self.get_local_coordinate(sx, dx);
+                let is_relevant_column = out_x == local_x;
+
+                let value = self.field[local_row + local_x];
+                if value {
+                    ind += power;
+                }
+
+                if is_relevant_row && is_relevant_column {
+                    difference = if value { power } else { -power };
+                }
+            }
+        }
+
+        // Metropolis algorithm: Determine energy difference before and after change.
+        self.weights[(ind - difference) as usize] / self.weights[ind as usize]
+    }
+
+    fn get_local_coordinate(&self, s: i64, d: u32) -> usize {
+        let mut local = s + d as i64;
+        if local < 0 {
+            local += self.output_size as i64;
+        } else if local >= self.output_size as i64 {
+            local -= self.output_size as i64;
+        }
+        local as usize
     }
 
     fn initialize_weights(sample: &ConvChainSample, receptor_size: u32) -> Vec<f64> {
@@ -99,67 +160,6 @@ impl ConvChain {
             field[i as usize] = rng.gen();
         }
         field
-    }
-
-    fn single_iteration(&mut self, r: usize) -> f64 {
-        let out_y = r / self.output_size as usize;
-        let out_x = r % self.output_size as usize;
-
-        let sy_min = out_y as i64 - self.receptor_size as i64 + 1;
-        let sy_max = out_y as i64 + self.receptor_size as i64 - 1;
-        let sx_min = out_x as i64 - self.receptor_size as i64 + 1;
-        let sx_max = out_x as i64 + self.receptor_size as i64 - 1;
-
-        let mut q: f64 = 1.0;
-
-        for sy in sy_min..=sy_max {
-            for sx in sx_min..=sx_max {
-                let weight = self.iteration_inner_loop(out_x, out_y, sx, sy);
-                q *= weight;
-            }
-        }
-
-        q
-    }
-
-    fn iteration_inner_loop(&mut self, out_x: usize, out_y: usize, sx: i64, sy: i64) -> f64 {
-        let mut ind = 0;
-        let mut difference: i64 = 0;
-
-        for dy in 0..self.receptor_size {
-            let local_y = self.get_local_coordinate(sy, dy);
-            let local_row = local_y * self.output_size as usize;
-            let is_relevant_row = out_y == local_y;
-
-            for dx in 0..self.receptor_size {
-                let power = 1i64 << (dy * self.receptor_size + dx);
-
-                let local_x = self.get_local_coordinate(sx, dx);
-                let is_relevant_column = out_x == local_x;
-
-                let value = self.field[local_row + local_x];
-                if value {
-                    ind += power;
-                }
-
-                if is_relevant_row && is_relevant_column {
-                    difference = if value { power } else { -power };
-                }
-            }
-        }
-
-        // Metropolis algorithm: Determine energy difference before and after change.
-        self.weights[(ind - difference) as usize] / self.weights[ind as usize]
-    }
-
-    fn get_local_coordinate(&self, s: i64, d: u32) -> usize {
-        let mut local = s + d as i64;
-        if local < 0 {
-            local += self.output_size;
-        } else if local >= self.output_size {
-            local -= self.output_size;
-        }
-        local as usize
     }
 }
 
