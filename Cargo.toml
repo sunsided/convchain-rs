@@ -1,7 +1,7 @@
 [package]
 name = "convchain"
 description = "Bitmap generation from a single example with convolutions and MCMC"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2018"
 keywords = ["mcmc", "generative-imaging", "image-processing"]
 categories = ["computer-vision", "graphics", "game-development"]
