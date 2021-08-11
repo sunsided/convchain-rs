@@ -39,7 +39,7 @@ impl ConvChain {
         let num_field_elements = self.output_size * self.output_size;
         let num_loops = iterations * num_field_elements as usize;
         for _ in 0..num_loops {
-            let r = rng.gen_range(0..num_field_elements);
+            let r = rng.gen_range(0..num_field_elements) as usize;
 
             let mut q = self.single_iteration(r);
 
@@ -101,14 +101,14 @@ impl ConvChain {
         field
     }
 
-    fn single_iteration(&mut self, r: i64) -> f64 {
-        let out_y = r / self.output_size;
-        let out_x = r % self.output_size;
+    fn single_iteration(&mut self, r: usize) -> f64 {
+        let out_y = r / self.output_size as usize;
+        let out_x = r % self.output_size as usize;
 
-        let sy_min = out_y - self.receptor_size as i64 + 1;
-        let sy_max = out_y + self.receptor_size as i64 - 1;
-        let sx_min = out_x - self.receptor_size as i64 + 1;
-        let sx_max = out_x + self.receptor_size as i64 - 1;
+        let sy_min = out_y as i64 - self.receptor_size as i64 + 1;
+        let sy_max = out_y as i64 + self.receptor_size as i64 - 1;
+        let sx_min = out_x as i64 - self.receptor_size as i64 + 1;
+        let sx_max = out_x as i64 + self.receptor_size as i64 - 1;
 
         let mut q: f64 = 1.0;
 
@@ -122,13 +122,13 @@ impl ConvChain {
         q
     }
 
-    fn iteration_inner_loop(&mut self, out_x: i64, out_y: i64, sx: i64, sy: i64) -> f64 {
+    fn iteration_inner_loop(&mut self, out_x: usize, out_y: usize, sx: i64, sy: i64) -> f64 {
         let mut ind = 0;
         let mut difference: i64 = 0;
 
         for dy in 0..self.receptor_size {
             let local_y = self.get_local_coordinate(sy, dy);
-            let local_row = local_y * self.output_size as i64;
+            let local_row = local_y * self.output_size as usize;
             let is_relevant_row = out_y == local_y;
 
             for dx in 0..self.receptor_size {
@@ -137,8 +137,7 @@ impl ConvChain {
                 let local_x = self.get_local_coordinate(sx, dx);
                 let is_relevant_column = out_x == local_x;
 
-                let index = local_row + local_x;
-                let value = self.field[index as usize];
+                let value = self.field[local_row + local_x];
                 if value {
                     ind += power;
                 }
@@ -153,14 +152,14 @@ impl ConvChain {
         self.weights[(ind - difference) as usize] / self.weights[ind as usize]
     }
 
-    fn get_local_coordinate(&self, s: i64, d: u32) -> i64 {
+    fn get_local_coordinate(&self, s: i64, d: u32) -> usize {
         let mut local = s + d as i64;
         if local < 0 {
             local += self.output_size;
         } else if local >= self.output_size {
             local -= self.output_size;
         }
-        local
+        local as usize
     }
 }
 
