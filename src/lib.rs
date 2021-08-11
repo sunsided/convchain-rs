@@ -1,4 +1,6 @@
 mod fast;
+mod sample;
 pub mod slow;
 
-pub use fast::conv_chain;
+pub use fast::ConvChain;
+pub use sample::ConvChainSample;

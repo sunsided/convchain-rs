@@ -9,6 +9,27 @@ A port of Maxim Gumin's [ConvChain] to Rust:
 Please have a look on the [original repo](https://github.com/mxgmn/ConvChain) for a
 more thorough description of the application of the [Metropolis algorithm] to the problem. 
 
+```rust
+fn main() {
+    // Generate a sample (this is the SimpleMaze example):
+    let pattern = [
+        true,  true,  true,  true,
+        true, false, false, false,
+        true, false,  true, false,
+        true, false, false, false,
+    ];
+    let sample = ConvChainSample::new(&pattern, 4, 4);
+
+    // Initialize the chain using given sample and a
+    // - 32x32 output size
+    // - receptor size of 2
+    // - temperature of 1.0
+    let mut chain = ConvChain::new(&sample, 32, 2, 1.0);
+    
+    // Generate the 32x32 field using 10 iterations.
+    let field: &[bool] = chain.process(10);
+}
+```
 
 ## Example run
 
@@ -28,6 +49,12 @@ $ cargo run --release --example fast
 
 This will process the jobs defined in [resources/samples.xml] and produce output images
 in the current directory.
+
+To run the benchmarks, execute
+
+```console
+$ cargo bench
+```
 
 [ConvChain]: https://github.com/mxgmn/ConvChain
 [resources/samples.xml]: resources/samples.xml

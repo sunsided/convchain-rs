@@ -1,4 +1,4 @@
-use convchain::conv_chain;
+use convchain::{ConvChain, ConvChainSample};
 use image::GrayImage;
 use rayon::prelude::*;
 use serde::Deserialize;
@@ -19,17 +19,18 @@ fn main() {
             .to_luma8();
         let sample = to_array(&gray);
 
+        let sample = ConvChainSample::new(&sample, gray.width() as _, gray.height() as _);
+
         for k in 0..row.screenshots {
             println!("> {} {}", row.name, k);
-            let result = conv_chain(
-                &sample,
-                gray.width(),
-                gray.height(),
-                row.receptor_size,
-                row.temperature,
-                row.output_size,
-                row.iterations,
-            );
+
+            // Initialize from the sample.
+            let mut chain =
+                ConvChain::new(&sample, row.output_size, row.receptor_size, row.temperature);
+
+            // Run for the specified number of iterations.
+            let result = chain.process(row.iterations);
+
             let output = to_image(row.output_size, row.output_size, result);
             output
                 .save(format!(
@@ -47,7 +48,7 @@ fn to_array(img: &GrayImage) -> Vec<bool> {
     vec
 }
 
-fn to_image(width: u32, height: u32, array: Vec<bool>) -> GrayImage {
+fn to_image(width: u32, height: u32, array: &[bool]) -> GrayImage {
     let bytes = array.iter().map(|&x| if x { 255 } else { 0 }).collect();
     GrayImage::from_raw(width, height, bytes).expect("unable to create image")
 }
