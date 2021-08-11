@@ -2,7 +2,7 @@ use rand::prelude::ThreadRng;
 use rand::Rng;
 
 pub fn conv_chain(
-    sample: &Vec<bool>,
+    sample: &[bool],
     sample_width: u32,
     sample_height: u32,
     receptor_size: u32,
@@ -105,7 +105,7 @@ fn initialize_field(field: &mut Vec<bool>, rng: &mut ThreadRng) {
 }
 
 fn initialize_weights(
-    sample: &Vec<bool>,
+    sample: &[bool],
     sample_width: u32,
     sample_height: u32,
     receptor_size: u32,

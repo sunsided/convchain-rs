@@ -18,6 +18,14 @@ path = "examples/conv_chain.rs"
 name = "fast"
 path = "examples/conv_chain_fast.rs"
 
+[[bench]]
+name = "bench_4x4"
+harness = false
+
+[[bench]]
+name = "bench_8x8"
+harness = false
+
 [dependencies]
 rand = "0.8.4"
 
@@ -26,4 +34,5 @@ image = "0.23.14"
 quick-xml = { version = "0.22.0", features = ["serialize"] }
 serde = { version = "1.0.126", features = ["derive"]}
 rayon = "1.5.1"
+criterion = "0.3.4"
 
