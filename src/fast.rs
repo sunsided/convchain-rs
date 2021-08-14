@@ -125,7 +125,11 @@ impl ConvChain {
     }
 
     fn initialize_weights(sample: &ConvChainSample, receptor_size: u32) -> Vec<f64> {
-        let mut weights = vec![0.0; 1 << (receptor_size * receptor_size)];
+        // Initialize all values to 0.1.
+        // This deviates from the original code in that _every_ weight is offset
+        // by 0.1, but it saves an extra loop.
+        let mut weights = vec![0.1; 1 << (receptor_size * receptor_size)];
+
         for y in 0..sample.height {
             for x in 0..sample.width {
                 let mut ps = Vec::with_capacity(8);
@@ -143,12 +147,6 @@ impl ConvChain {
                 for k in 0..8 {
                     weights[index(&ps[k])] += 1.0;
                 }
-            }
-        }
-
-        for k in 0..weights.len() {
-            if weights[k] <= 0. {
-                weights[k] = 0.1;
             }
         }
 
